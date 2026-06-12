@@ -1,0 +1,20 @@
+{
+  "ks": 0.0,
+  "box": {
+    "L": [90.0, 110.0],
+    "c": [1.0, 1.0]
+  },
+  "ast": {
+    "k": "op", "op": "sub",
+    "args": [
+      { "k": "op", "op": "div",
+        "args": [
+          { "k": "hole", "id": "kc", "arity": 1, "regime": "B", "phys": [200.0, 600.0],
+            "args": [ { "k": "var", "sym": "L" } ] },
+          { "k": "op", "op": "mul",
+            "args": [ { "k": "var", "sym": "c" }, { "k": "var", "sym": "L" } ] }
+        ] },
+      { "k": "const", "v": 1.0 }
+    ]
+  }
+}

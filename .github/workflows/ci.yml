@@ -1,0 +1,32 @@
+name: ci
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    container: gcc:13
+    steps:
+      - uses: actions/checkout@v4
+      - name: build
+        run: make all
+      - name: test
+        run: make test
+      - name: smoke
+        run: |
+          ./bin/extract tests/fixtures/beam.xlsx 0.05
+          ./bin/verify examples/safe_margin.json
+  docker:
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: build image
+        run: docker build -f deploy/Dockerfile -t ghcr.io/fve/fve:${{ github.sha }} .
+      - name: login
+        if: github.ref == 'refs/heads/main'
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: push
+        if: github.ref == 'refs/heads/main'
+        run: docker push ghcr.io/fve/fve:${{ github.sha }}

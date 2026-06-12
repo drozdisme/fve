@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package fve.v1;
+
+service Fve {
+  rpc Upload (UploadRequest) returns (UploadReply);
+  rpc Analyze (IdRequest) returns (AnalyzeReply);
+  rpc Verify (VerifyRequest) returns (VerifyReply);
+  rpc GetCertificate (IdRequest) returns (CertificateReply);
+  rpc GetArtifact (IdRequest) returns (ArtifactReply);
+  rpc GetGraph (IdRequest) returns (GraphReply);
+  rpc Provenance (IdRequest) returns (ProvenanceReply);
+  rpc AuditHistory (AuditRequest) returns (AuditReply);
+}
+
+message UploadRequest {
+  string name = 1;
+  string mime = 2;
+  bytes content = 3;
+}
+message UploadReply {
+  string artifact_id = 1;
+  uint64 size = 2;
+}
+
+message IdRequest { string id = 1; }
+
+message AnalyzeReply {
+  bool ok = 1;
+  string model_id = 2;
+  string format = 3;
+  int32 sdg_nodes = 4;
+  int32 sdg_edges = 5;
+  bool glue_consistent = 6;
+  bool glue_obstructed = 7;
+}
+
+message VerifyRequest {
+  string artifact_id = 1;
+  double rel_dev = 2;
+}
+message Target {
+  string cell = 1;
+  string label = 2;
+  string verdict = 3;
+  double ms_lo = 4;
+  double ms_hi = 5;
+  string method = 6;
+  int32 holes = 7;
+  string cert = 8;
+  bool cert_valid = 9;
+}
+message VerifyReply {
+  bool ok = 1;
+  string run_id = 2;
+  repeated Target targets = 3;
+}
+
+message CertificateReply {
+  string run_id = 1;
+  string artifact_id = 2;
+  bool audit_chain_ok = 3;
+  repeated Target targets = 4;
+}
+
+message ArtifactReply {
+  string id = 1;
+  string name = 2;
+  string hash = 3;
+  uint64 size = 4;
+}
+
+message GraphNode {
+  string id = 1;
+  string label = 2;
+  bool input = 3;
+  bool ambiguous = 4;
+}
+message GraphEdge {
+  string from = 1;
+  string to = 2;
+  string origin = 3;
+}
+message GraphReply {
+  repeated GraphNode nodes = 1;
+  repeated GraphEdge edges = 2;
+}
+
+message ProvenanceEdge {
+  string from = 1;
+  string to = 2;
+  string rel = 3;
+}
+message ProvenanceReply { repeated ProvenanceEdge edges = 1; }
+
+message AuditRequest { string subject = 1; }
+message AuditEntry {
+  uint64 seq = 1;
+  string type = 2;
+  string subject = 3;
+  string prev = 4;
+}
+message AuditReply {
+  bool chain_ok = 1;
+  repeated AuditEntry entries = 2;
+}

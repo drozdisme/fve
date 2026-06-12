@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fve-config
+data:
+  FVE_DATA: "/app/data"
+  FVE_UI: "/app/ui"
+  FVE_PORT: "8080"
+  FVE_PROBE_PER_DIM: "5"
+  FVE_WRAPPER_SAFETY: "1.25"

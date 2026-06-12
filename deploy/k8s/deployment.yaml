@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fve-api
+  labels: { app: fve-api }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: fve-api }
+  template:
+    metadata:
+      labels: { app: fve-api }
+    spec:
+      containers:
+        - name: fve-api
+          image: ghcr.io/fve/fve:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef: { name: fve-config }
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef: { name: fve-db, key: url }
+          readinessProbe:
+            httpGet: { path: /api/health, port: 8080 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /api/health, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 20
+          resources:
+            requests: { cpu: "250m", memory: "256Mi" }
+            limits: { cpu: "1", memory: "1Gi" }
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: fve-data }

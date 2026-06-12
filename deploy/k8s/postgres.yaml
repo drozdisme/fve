@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: fve-db
+spec:
+  serviceName: fve-db
+  replicas: 1
+  selector:
+    matchLabels: { app: fve-db }
+  template:
+    metadata:
+      labels: { app: fve-db }
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: fve
+            - name: POSTGRES_DB
+              value: fve
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: fve-db, key: password }
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata: { name: pgdata }
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources: { requests: { storage: 10Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fve-db
+spec:
+  selector: { app: fve-db }
+  ports: [{ port: 5432, targetPort: 5432 }]
+  clusterIP: None

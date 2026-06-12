@@ -1,0 +1,30 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      FVE_DATA: /app/data
+      FVE_UI: /app/ui
+      FVE_PORT: "8080"
+      DATABASE_URL: postgres://fve:fve@db:5432/fve
+    volumes:
+      - fve_data:/app/data
+    depends_on:
+      - db
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: fve
+      POSTGRES_PASSWORD: fve
+      POSTGRES_DB: fve
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ../db/migrations:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+volumes:
+  fve_data:
+  pg_data:
